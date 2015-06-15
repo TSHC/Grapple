@@ -2,6 +2,7 @@ package com.tshcmiller.grapple;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 
 import javax.swing.ImageIcon;
@@ -30,7 +31,7 @@ public final class Grapple implements Runnable {
 		prefSize = Toolkit.getDefaultToolkit().getScreenSize();
 		game = new Game();
 		launcher = new GrappleLauncher();
-		frame = new JFrame("Grapple!");
+		frame = new JFrame();
 		thread = new Thread(this, "Main Thread");
 	}
 	
@@ -38,15 +39,26 @@ public final class Grapple implements Runnable {
 		Grapple grapple = new Grapple();
 		Grapple.instance = grapple;
 		grapple.createLauncher();
+		
+		while (true) {
+			grapple.frame.repaint();
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private void createLauncher() {
-		frame.setPreferredSize(new Dimension(800, 450));
+		frame.setUndecorated(true);
+		frame.setSize(new Dimension(600, 360));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
 		frame.add(launcher);
-		frame.pack();
-		
+		frame.setResizable(false);
+		frame.setLocationRelativeTo(null);
+//		frame.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("res/img/cursors/default-cursor.cur").getImage(), new Point(0, 0), "default"));
 		frame.setVisible(true);
 	}
 	

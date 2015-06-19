@@ -2,7 +2,7 @@ package com.tshcmiller.grapple.sound;
 
 public enum Sounds {
 
-	LAUNCHER_SELECT("res/sounds/launcher-select.wav");
+	LAUNCHER_SCROLL("res/audio/launcher-scroll.wav");
 	
 	protected String path;
 	

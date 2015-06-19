@@ -5,12 +5,18 @@ import java.io.File;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 
 public final class Sound {
 	
-	private Sound() {} //You can not instantiate outside this class
+	public static boolean playSound = true; //Play sound
 	
-	public static boolean playSound = true;
+	private Clip clip; //Each sound reserves a clip...allows mutliple sounds to be played at once
+	
+	//You can not instantiate outside this class
+	private Sound() throws LineUnavailableException {
+		clip = AudioSystem.getClip();
+	} 
 	
 	public static void play(Sounds sound) {
 		if (!playSound)
@@ -20,7 +26,9 @@ public final class Sound {
 		
 		try {
 			AudioInputStream input = AudioSystem.getAudioInputStream(new File(path));
-			Clip clip = AudioSystem.getClip();
+			Sound inst = new Sound();
+			Clip clip = inst.clip;
+			
 			clip.open(input);
 			
 			new Thread() {

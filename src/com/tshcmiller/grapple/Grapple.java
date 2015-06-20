@@ -1,13 +1,8 @@
 package com.tshcmiller.grapple;
 
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -18,23 +13,21 @@ import javax.swing.JFrame;
  * 
  * @author TSHC
  */
-public final class Grapple implements Runnable {
+public final class Grapple {
+
+	public static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
 	public static Grapple instance;
 	
-	private Dimension prefSize; //The preferred size of the window
 	private Game game; //The game to be played
 	private GrappleLauncher launcher; //The launcher for this game
 	private JFrame frame; //The window that the game will be played on
-	private Thread thread; //The main logic thread
-	private Image img = new ImageIcon("res/img/test-icon.png").getImage();
+//	private Image img = new ImageIcon("res/img/test-icon.png").getImage();
 
 	private Grapple() {
-		prefSize = Toolkit.getDefaultToolkit().getScreenSize();
 		game = new Game();
 		launcher = new GrappleLauncher();
 		frame = new JFrame();
-		thread = new Thread(this, "Main Thread");
 	}
 	
 	private void createLauncher() {
@@ -52,28 +45,29 @@ public final class Grapple implements Runnable {
 	
 	private void initUI() {
 		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setUndecorated(true);
-		frame.setPreferredSize(new Dimension(prefSize)); //Worry about res later
+		frame.setPreferredSize(new Dimension(SIZE)); //Worry about res later
 		frame.pack();
 		frame.add(game);
-		frame.setIconImage(img);
+		startGame();
 	}
 	
 	public static void main(String[] args) {
 		Grapple grapple = new Grapple();
 		Grapple.instance = grapple;
-		grapple.createLauncher();
+//		grapple.createLauncher(); //-> use this line to start up from the launcher
+		grapple.initUI(); //-> use this line to start up from the game
 	}
 	
 	public void quitLauncher() {
 		frame.dispose(); //get rid of the launcher frame
 		initUI(); //create a new frame
-		//load resources (this will be later
-		thread.start(); //start the game
 	}
 	
-	public void run() {
-		
+	public void startGame() {
+		frame.setVisible(true);
+		game.getThread().start();
 	}
 	
 	public JFrame getFrame() {

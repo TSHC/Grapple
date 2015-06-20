@@ -13,9 +13,7 @@ import javax.swing.JPanel;
 
 public class GrappleLauncher extends JPanel {
 	private static final long serialVersionUID = 1L;
-	
-	private Font contb;
-	private Font contl;
+
 	private GrappleLauncherListener listener;
 
 	protected int indexSelected; //What index is currently selected
@@ -34,30 +32,13 @@ public class GrappleLauncher extends JPanel {
 			"Options",
 			"Exit"
 		};
-		
-		loadFonts();
-		
+				
 		setFocusable(true);
 		addKeyListener(listener);
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
 	}
 	
-	private void loadFonts() {
-		try {
-			GraphicsEnvironment graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			
-			contb = Font.createFont(Font.TRUETYPE_FONT, new File("res/fonts/contb.ttf"));
-			contb = contb.deriveFont(Font.PLAIN, 48f);
-			contl = Font.createFont(Font.TRUETYPE_FONT, new File("res/fonts/contl.ttf"));
-			contl = contl.deriveFont(Font.PLAIN, 18f);
-			
-			graphics.registerFont(contb);
-		} catch (FontFormatException | IOException e) {
-			System.err.println("Unable to load custom fonts");
-			e.printStackTrace();
-		}
-	}
 	
 	private void renderBackground(Graphics2D g) {
 		g.setColor(Color.DARK_GRAY);
@@ -73,7 +54,7 @@ public class GrappleLauncher extends JPanel {
 		int y = 260;
 		int offs = 0;
 		
-		g.setFont(contl);
+		g.setFont(Fonts.contl);
 		
 		for (int i = 0; i < options.length; i++) {
 			offs = 25 * i;
@@ -89,12 +70,12 @@ public class GrappleLauncher extends JPanel {
 		
 		
 		//Title
-		g.setFont(contb);
+		g.setFont(Fonts.contb);
 		g.setColor(selected);
 		g.drawString("Grapple", (getWidth() >> 1) - 75, 60);
 		
 		//Game Information
-		g.setFont(contl.deriveFont(12f));
+		g.setFont(Fonts.contl.deriveFont(12f));
 		g.setColor(unselected);
 		g.drawString("TSHC", 515, 325);
 		g.drawString("Version 0.1.3", 515, 340);

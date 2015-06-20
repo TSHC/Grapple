@@ -1,37 +1,65 @@
 package com.tshcmiller.grapple;
 
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class Game extends JPanel {
+import com.tshcmiller.grapple.entity.Ship;
+import com.tshcmiller.grapple.world.World;
+
+public class Game extends JPanel implements Runnable {
 	private static final long serialVersionUID = 1L;
+		
+	private Thread thread;
+	private World world;
+	private Ship player;
 	
 	private boolean running;
 	
 	public Game() {
-		running = false; //Do not start the game yet
+		player = new Ship(600, 250);
+		world = new World(player);
+		running = false;
+		thread = new Thread(this, "Main Game Thread");
+		
+		setFocusable(true);
+		addKeyListener(player.getListener());
 	}
 	
-	public void startGame() {
-		if (running) {
-			JOptionPane.showMessageDialog(null, "An instance of Grapple is already running!");
-			return;
-		}
+	@Override
+	public void paint(Graphics graphics) {
+		super.paint(graphics);
 		
-		running = true;
-	}
-	
-	public void paint(Graphics g) {
-		if (!running)
-			return;
+		Graphics2D g = (Graphics2D) graphics;
 		
-		super.paint(g);
-		
-		Graphics2D g2 = (Graphics2D) g;
-		g2.drawString("Grapple!", 150, 150);
+		world.render(g); //render the world
+		player.render(g); //render entities
 	}
 
+	@Override
+	public void run() {
+		
+		running = true;
+		long ticks = 0;
+		
+		while (running) {
+			//read user input
+			player.getForces().applyVerticalForce(1); //move entities
+			player.move();
+			//handle collisions
+			repaint();
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public Thread getThread() {
+		return thread;
+	}
 }

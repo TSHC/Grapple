@@ -56,7 +56,7 @@ public final class Grapple {
 	public static void main(String[] args) {
 		Grapple grapple = new Grapple();
 		Grapple.instance = grapple;
-//		grapple.createLauncher(); //-> use this line to start up from the launcher
+		grapple.createLauncher(); //-> use this line to start up from the launcher
 		grapple.initUI(); //-> use this line to start up from the game
 	}
 	

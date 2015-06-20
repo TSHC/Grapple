@@ -6,9 +6,11 @@ import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 public class GrappleLauncher extends JPanel {
@@ -41,13 +43,13 @@ public class GrappleLauncher extends JPanel {
 	
 	
 	private void renderBackground(Graphics2D g) {
-		g.setColor(Color.DARK_GRAY);
-		g.fillRect(0, 0, getWidth(), getHeight());
+		Image background = new ImageIcon("res/img/splash.png", "splash page").getImage();
+		g.drawImage(background, 0, 0, background.getWidth(null), background.getHeight(null), null);
 	}
 	
 	private void renderForeground(Graphics2D g) {
 		Color selected = Color.CYAN; //Color when an option is selected
-		Color unselected = new Color(0x00, 0x88, 0x88); //Color when an option is not selected
+		Color unselected = new Color(255, 255, 255); //Color when an option is not selected
 		
 		//Options
 		int x = 25;
@@ -71,7 +73,7 @@ public class GrappleLauncher extends JPanel {
 		
 		//Title
 		g.setFont(Fonts.contb);
-		g.setColor(selected);
+		g.setColor(unselected);
 		g.drawString("Grapple", (getWidth() >> 1) - 75, 60);
 		
 		//Game Information

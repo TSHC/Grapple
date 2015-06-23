@@ -1,77 +1,125 @@
 package com.tshcmiller.grapple;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
+import com.tshcmiller.grapple.entity.Ship;
 
-/**
- * The Grapple class serves as the base object that starts
- * the game.
- * 
- * @author TSHC
- */
-public final class Grapple {
 
-	public static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
-
-	public static Grapple instance;
+public class Grapple {
 	
-	private Game game; //The game to be played
-	private GrappleLauncher launcher; //The launcher for this game
-	private JFrame frame; //The window that the game will be played on
-//	private Image img = new ImageIcon("res/img/test-icon.png").getImage();
+	public static final String TITLE = "Grapple 0.1.9";
 
-	private Grapple() {
-		game = new Game();
-		launcher = new GrappleLauncher();
-		frame = new JFrame();
+	public static final int WIDTH = 1360;
+	public static final int HEIGHT = 730;
+	
+	private boolean running;
+	private long lastFrame;
+	private long lastFPS;
+	private int FPS;
+	private int targetFPS;
+	
+	Ship ship;
+	
+	public Grapple() {
+		running = false;
+		lastFrame = 0;
+		FPS = 0;
+		lastFPS = 0;
+		targetFPS = 60;
 	}
 	
-	private void createLauncher() {
-		frame.setUndecorated(true);
-		frame.setSize(new Dimension(600, 360));
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(launcher);
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
-//		frame.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon("res/img/cursors/default-cursor.cur").getImage(), new Point(0, 0), "default"));
-		frame.setVisible(true);
+	private void initGL() {
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		GL11.glViewport(0, 0, WIDTH, HEIGHT);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GL11.glOrtho(0, WIDTH, HEIGHT, 0, 1, -1);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+	}
+	
+	private void start() {
+		running = true;
 		
-		launcher.run();
-	}
-	
-	private void initUI() {
-		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setUndecorated(true);
-		frame.setPreferredSize(new Dimension(SIZE)); //Worry about res later
-		frame.pack();
-		frame.add(game);
-		startGame();
+		try {
+			Display.setTitle(TITLE);
+			Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));	
+			Display.create();
+		} catch (LWJGLException e) {
+			System.out.println("Window creation failed.");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		ship = new Ship(50, 50);
+		lastFPS = getTime();
+		initGL();
+		run();
 	}
 	
 	public static void main(String[] args) {
 		Grapple grapple = new Grapple();
-		Grapple.instance = grapple;
-		grapple.createLauncher(); //-> use this line to start up from the launcher
-		grapple.initUI(); //-> use this line to start up from the game
+		grapple.start();
 	}
 	
-	public void quitLauncher() {
-		frame.dispose(); //get rid of the launcher frame
-		initUI(); //create a new frame
+	public void run() {
+		while (running) {
+			if (Display.isCloseRequested()) {
+				running = false;
+				break;
+			}
+			
+			int delta = getDelta();
+			
+			update(delta);
+			render();
+			
+			Display.update();
+			Display.sync(targetFPS);
+		}
+		
+		Display.destroy();
 	}
 	
-	public void startGame() {
-		frame.setVisible(true);
-		game.getThread().start();
+	public void render() {
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+		ship.render();
 	}
 	
-	public JFrame getFrame() {
-		return frame;
+	public void update(int delta) {
+		ship.update(delta);
+		calculateFPS();
 	}
 	
+	public int getDelta() {
+		long time = getTime();
+		int delta = (int) (time - lastFrame);
+		lastFrame = time;
+		
+		return delta;
+	}
+	
+	public int calculateFPS() {
+		if (getTime() - lastFPS > 1000) {
+			FPS = 0;
+			lastFPS += 1000;
+		}
+		
+		return ++FPS;
+	}
+	
+	public long getTime() {
+		return System.nanoTime() / 1000000;
+	}
+
 }

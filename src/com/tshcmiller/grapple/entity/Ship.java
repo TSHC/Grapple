@@ -1,53 +1,86 @@
 package com.tshcmiller.grapple.entity;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
-import java.util.List;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
-import com.tshcmiller.grapple.Fonts;
+import com.tshcmiller.grapple.Grapple;
 
 public class Ship extends Entity {
-
-	private ShipListener listener;
 	
-	public Ship(double x, double y) {
-		super(x, y);
-		
-		this.listener = new ShipListener(this);
+	private int key_up = Keyboard.KEY_W;
+	private int key_down = Keyboard.KEY_S;
+	private int key_left = Keyboard.KEY_A;
+	private int key_right = Keyboard.KEY_D;
+	
+	private float syf = 0.0f;
+	private float sxf = 0.0f;
+
+	public Ship(float x, float y) {
+		super("res/textures/default-ship.png", x, y);
 	}
 	
-	public void keyPressed(List<Integer> list) {
-		double amount = 25.0;
+	private boolean isPressed(int key) {
+		return Keyboard.isKeyDown(key);
+	}
+	
+	public void update(int delta) {
+		float force = 16f / 100f;
+		float gravity = 8f / 100f;
 		
-		if (list.contains(KeyEvent.VK_W)) {
-			forces.applyVerticalForce(-amount);
+		if (isPressed(key_up)) {
+			syf -= force;
 		}
 		
-		if (list.contains(KeyEvent.VK_S)) {
-			forces.applyVerticalForce(amount);
+		if (isPressed(key_down)) {
+			syf += force;
 		}
 		
-		if (list.contains(KeyEvent.VK_A)) {
-			forces.applyHorizontalForce(-amount);
+		if (isPressed(key_left)) {
+			sxf -= force;
 		}
 		
-		if (list.contains(KeyEvent.VK_D)) {
-			forces.applyHorizontalForce(amount);
+		if (isPressed(key_right)) {
+			sxf += force;
+		}
+		
+		y += syf;
+		x += sxf;
+		syf += gravity;
+		
+		if (y < 0) {
+			y = 0;
+		}
+		
+		if (y > Grapple.HEIGHT) {
+			y = Grapple.HEIGHT;
+		}
+		
+		if (x < 0) {
+			x = 0;
+		}
+		
+		if (x > Grapple.WIDTH) {
+			x = Grapple.WIDTH;
 		}
 	}
-
-	@Override
-	public void render(Graphics2D g) {
-		g.setColor(Color.RED);
-		g.fillRect((int) x, (int) y, 60, 60);
+	
+	public void render() {
+		GL11.glPushMatrix();
+		texture.bind();
+		GL11.glTranslatef(x, y, 0);
+    	GL11.glColor3f(1,1,1);
 		
-		g.setFont(Fonts.contl);
-		g.drawString(String.format("Horizontal Force: %.2f", forces.getHorizontalForce()), 68, 635);
-		g.drawString(String.format("Vertical Force: %.2f", forces.getVerticalForce()), 68, 660);
-	}
-
-	public ShipListener getListener() {
-		return listener;
+		GL11.glBegin(GL11.GL_QUADS);
+	      GL11.glTexCoord2f(0, 0);
+	      GL11.glVertex2f(0, 0);
+	      GL11.glTexCoord2f(0, texture.getHeight());
+	      GL11.glVertex2f(0, texture.getImageHeight());
+	      GL11.glTexCoord2f(texture.getWidth(), texture.getHeight());
+	      GL11.glVertex2f(texture.getImageWidth(), texture.getImageHeight());
+	      GL11.glTexCoord2f(texture.getWidth(), 0);
+	      GL11.glVertex2f(texture.getImageWidth(), 0);
+		GL11.glEnd();
+		
+		GL11.glPopMatrix();
 	}
 }

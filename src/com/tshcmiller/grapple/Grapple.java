@@ -1,28 +1,28 @@
 package com.tshcmiller.grapple;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-
-import com.tshcmiller.grapple.entity.Ship;
-
+import org.newdawn.slick.Color;
 
 public class Grapple {
 	
 	public static final String TITLE = "Grapple 0.1.9";
 
-	public static final int WIDTH = 1360;
-	public static final int HEIGHT = 730;
+	public static final int WIDTH = 1200;
+	public static final int HEIGHT = 700;
 	
 	private boolean running;
 	private long lastFrame;
 	private long lastFPS;
 	private int FPS;
 	private int targetFPS;
+	private int currentFPS;
 	
-	Ship ship;
-	
+	private Game game;
+		
 	public Grapple() {
 		running = false;
 		lastFrame = 0;
@@ -60,10 +60,17 @@ public class Grapple {
 			System.exit(0);
 		}
 		
-		ship = new Ship(50, 50);
+		game = new Game();
 		lastFPS = getTime();
-		initGL();
+		initGL();		
 		run();
+	}
+	
+	public void stop() {
+		//save...
+		Display.destroy();
+		AL.destroy();
+		System.exit(0);
 	}
 	
 	public static void main(String[] args) {
@@ -77,28 +84,34 @@ public class Grapple {
 				running = false;
 				break;
 			}
-			
+						
 			int delta = getDelta();
+			
 			
 			update(delta);
 			render();
+			updateTimers();
+			calculateFPS();
 			
 			Display.update();
 			Display.sync(targetFPS);
 		}
 		
-		Display.destroy();
+		stop();
 	}
 	
 	public void render() {
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-
-		ship.render();
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		game.getWorld().render();
+		game.contl.drawString(10, 10, "FPS: " + currentFPS, Color.cyan);
 	}
 	
 	public void update(int delta) {
-		ship.update(delta);
-		calculateFPS();
+		game.getWorld().update(delta);		
+	}
+	
+	public void updateTimers() {
+		game.getWorld().updateTimer();
 	}
 	
 	public int getDelta() {
@@ -109,17 +122,22 @@ public class Grapple {
 		return delta;
 	}
 	
-	public int calculateFPS() {
+	public void calculateFPS() {
 		if (getTime() - lastFPS > 1000) {
+			currentFPS = FPS;
 			FPS = 0;
 			lastFPS += 1000;
 		}
 		
-		return ++FPS;
+		++FPS;
 	}
 	
-	public long getTime() {
+	public static long getTime() {
 		return System.nanoTime() / 1000000;
+	}
+	
+	public static long getSeconds() {
+		return getTime() / 1000;
 	}
 
 }

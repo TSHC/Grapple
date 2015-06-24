@@ -20,16 +20,16 @@ ___
 *Note:* Grapple is currently in very early stages of devolopment. <br />
 
 ###Controls
-W - Apply an upward force to your ship
-S - Apply a down force to your ship
-A - Apply a leftward force to your ship
-D - Apply a rightward force to your ship
+W - Apply an upward force to your ship<br />
+S - Apply a down force to your ship<br />
+A - Apply a leftward force to your ship<br />
+D - Apply a rightward force to your ship<br />
 
 ###Gravity
 Gravity is currently functional; it will also randomly change in direction.
 
 ##Devolopment Log
-*15 June.* Project began! Bases for the game were added.
-*20 June.* Added Basic Movement
-*23 June.* Project is now using [LWJGL](http://www.lwjgl.org/ LWJGL)
-*24 June.* Gravity is now functional! Added some settings.
+*15 June.* Project began! Bases for the game were added.<br />
+*20 June.* Added Basic Movement<br />
+*23 June.* Project is now using [LWJGL](http://www.lwjgl.org/ LWJGL)<br />
+*24 June.* Gravity is now functional! Added some settings.<br />

@@ -6,6 +6,8 @@ import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.openal.AudioLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+import com.tshcmiller.grapple.Settings;
+
 public enum Sound {
 	
 	LAUNCHER_SCROLL("launcher-scroll.wav");
@@ -20,15 +22,13 @@ public enum Sound {
 		}
 	}
 	
-	private Audio getAudio() {
-		return audio;
-	}
-	
 	public static void playSoundEffect(Sound sound) {
-		sound.audio.playAsSoundEffect(1.0f, 1.0f, false);
+		if (Settings.settings.playSound)
+			sound.audio.playAsSoundEffect(1.0f, 1.0f, false);
 	}
 	
 	public static void playMusic(Sound sound) {
-		sound.audio.playAsMusic(1.0f, 1.0f, true);
+		if (Settings.settings.playSound)
+			sound.audio.playAsMusic(1.0f, 1.0f, true);
 	}
 }

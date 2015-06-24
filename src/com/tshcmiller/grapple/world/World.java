@@ -96,7 +96,7 @@ public class World implements Renderable {
 		if (Grapple.getSeconds() + 5 >= targetTime) {
 			int seconds = (int) (targetTime - Grapple.getSeconds());
 			
-			float x = (Grapple.WIDTH >> 1) - 250;
+			float x = (Grapple.width >> 1) - 250;
 			float y = 50;
 			
 			game.contl.drawString(x, y, "Gravity changing to " + nextState + " in " + seconds + " seconds!", Color.cyan);

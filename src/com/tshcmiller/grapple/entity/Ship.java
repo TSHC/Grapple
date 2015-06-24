@@ -46,16 +46,16 @@ public class Ship extends Entity {
 			y = 0;
 		}
 		
-		if (y > Grapple.HEIGHT - texture.getImageHeight()) {
-			y = Grapple.HEIGHT - texture.getImageHeight();
+		if (y > Grapple.height - texture.getImageHeight()) {
+			y = Grapple.height - texture.getImageHeight();
 		}
 		
 		if (x < 0) {
 			x = 0;
 		}
 		
-		if (x > Grapple.WIDTH - texture.getImageWidth()) {
-			x = Grapple.WIDTH - texture.getImageWidth();
+		if (x > Grapple.width - texture.getImageWidth()) {
+			x = Grapple.width - texture.getImageWidth();
 		}
 	}
 }

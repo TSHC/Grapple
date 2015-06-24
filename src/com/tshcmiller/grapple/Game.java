@@ -18,9 +18,7 @@ public class Game {
 	public Game() {
 		world = new World(this, 0.09f);
 		
-		try {
-			System.out.println("Registering fonts");
-			
+		try {			
 			InputStream stream = ResourceLoader.getResourceAsStream("res/fonts/contl.ttf");
 			
 			Font font = Font.createFont(Font.TRUETYPE_FONT, stream);

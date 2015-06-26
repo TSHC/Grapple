@@ -1,16 +1,23 @@
 package com.tshcmiller.grapple;
 
+import static org.lwjgl.opengl.GL11.glClearColor;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.Color;
+
+import com.tshcmiller.grapple.game.Game;
+import com.tshcmiller.grapple.game.GameState;
+import com.tshcmiller.grapple.util.Renderer;
+import com.tshcmiller.grapple.util.Timer;
 
 public class Grapple {
 	
 	public static final String TITLE = "Grapple 0.1.9";
+	public static GameState state = GameState.LAUNCHER;
 
 	public static int width = 1200;
 	public static int height = 700;
@@ -19,7 +26,6 @@ public class Grapple {
 	private long lastFrame;
 	private long lastFPS;
 	private int FPS;
-	private int targetFPS;
 	private int currentFPS;
 	
 	private Game game;
@@ -29,23 +35,17 @@ public class Grapple {
 		lastFrame = 0;
 		FPS = 0;
 		lastFPS = 0;
-		targetFPS = 60;
 	}
 	
 	private void initGL() {
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-		GL11.glViewport(0, 0, width, height);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GL11.glOrtho(0, width, height, 0, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
 	
 	private void start() {
@@ -54,15 +54,15 @@ public class Grapple {
 		try {
 			Display.setTitle(TITLE);
 			
-			if (Settings.settings.useFullScreen) {
-				Display.setFullscreen(true);
-				width = Display.getWidth();
-				height = Display.getHeight();
-			} else {
+//			if (Settings.settings.useFullScreen) {
+//				Display.setFullscreen(true);
+//				width = Display.getWidth();
+//				height = Display.getHeight();
+//			} else {
 				width = Settings.settings.prefWidth;
 				height = Settings.settings.prefHeight;
 				Display.setDisplayMode(new DisplayMode(width, height));	
-			}
+//			}
 			
 			Display.create();
 		} catch (LWJGLException e) {
@@ -92,6 +92,8 @@ public class Grapple {
 	}
 	
 	public void run() {
+		Display.update();
+		
 		while (running) {
 			if (Display.isCloseRequested()) {
 				running = false;
@@ -102,11 +104,10 @@ public class Grapple {
 			
 			update(delta);
 			render();
-			updateTimers();
 			calculateFPS();
 			
 			Display.update();
-			Display.sync(targetFPS);
+			Display.sync(60);
 		}
 		
 		stop();
@@ -114,26 +115,17 @@ public class Grapple {
 	
 	public void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		game.getWorld().render();
-		
-		if (Settings.settings.showDevOptions)
-			game.contl.drawString(10, 10, "FPS: " + currentFPS, Color.cyan);
+		Renderer.drawString(10, 10, "FPS: " + currentFPS);
+		game.render();
 	}
 	
 	public void update(int delta) {
-		game.getWorld().update(delta);	
+		game.update(delta);
 		
-		if (Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
-			Settings.settings.playSound = !Settings.settings.playSound;
+		while (Keyboard.next())
+		if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE && Keyboard.getEventKeyState()) {
+			System.out.println("paused");
 		}
-		
-		if (Keyboard.isKeyDown(Keyboard.KEY_F2)) {
-			Settings.settings.showDevOptions = !Settings.settings.showDevOptions;
-		}
-	}
-	
-	public void updateTimers() {
-		game.getWorld().updateTimer();
 	}
 	
 	public int getDelta() {
@@ -146,6 +138,7 @@ public class Grapple {
 	
 	public void calculateFPS() {
 		if (getTime() - lastFPS > 1000) {
+			Timer.updateTimers();
 			currentFPS = FPS;
 			FPS = 0;
 			lastFPS += 1000;
@@ -157,9 +150,4 @@ public class Grapple {
 	public static long getTime() {
 		return System.nanoTime() / 1000000;
 	}
-	
-	public static long getSeconds() {
-		return getTime() / 1000;
-	}
-
 }

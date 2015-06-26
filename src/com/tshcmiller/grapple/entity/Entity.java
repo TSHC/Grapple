@@ -1,67 +1,53 @@
 package com.tshcmiller.grapple.entity;
 
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glColor3f;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glTranslatef;
-import static org.lwjgl.opengl.GL11.glVertex2f;
-
 import java.awt.Rectangle;
-import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
 
+import com.tshcmiller.grapple.Grapple;
 import com.tshcmiller.grapple.Renderable;
+import com.tshcmiller.grapple.util.Loader;
+import com.tshcmiller.grapple.util.Renderer;
 import com.tshcmiller.grapple.world.World;
 
 public abstract class Entity implements Renderable {
+	
+	public static Set<Entity> entitiesToDelete = new HashSet<Entity>();
 	
 	protected Texture texture;
 	protected World world;
 	
 	protected float x;
 	protected float y;
-	protected float sxf;
-	protected float syf; 
+	protected float xa;
+	protected float ya; 
 	protected float rot;
-//	protected float mass;
+	protected float mass;
 	protected boolean isVisible;
 	
-	public Entity(World world, float mass, String imgPath, float x, float y) {
+	public Entity(World world, float x, float y, float mass, String img) {
+		this.texture = new Loader(img).getTexture();
 		this.world = world;
 		this.x = x;
 		this.y = y;
+		this.xa = 0;
+		this.ya = 0;
 		this.rot = 0;
-//		this.mass = mass;
+		this.mass = mass;
 		this.isVisible = true;
-		
-		try {
-			texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream(imgPath));
-		} catch (IOException e) {
-			System.out.println("Unable to load image at: " + imgPath);
-			e.printStackTrace();
-		}
 	}
 	
 	public abstract void update(int delta);
 	
-	public void applyHorizontalGravity(float dsxf) {
-		sxf += (dsxf / 1);
+	protected void addForDeletion() {
+		entitiesToDelete.add(this);
 	}
 	
-	public void applyVerticalGravity(float dsyf) {
-		syf += (dsyf / 1);
-	}
-	
-	public void applyDiagonalGravity(float dsxf, float dsyf) {
-		applyHorizontalGravity(dsxf);
-		applyVerticalGravity(dsyf);
+	public void move() {
+		y += ya;
+		x += xa;
 	}
 	
 	public boolean isColliding(Entity e) {
@@ -71,65 +57,20 @@ public abstract class Entity implements Renderable {
 		return (rect1.intersects(rect2));
 	}
 	
+	public boolean isOutOfBounds() {
+		return (x < 0 || x > Grapple.width || y < 0 || y > Grapple.height);
+	}
+	
 	public void render() {
-		glPushMatrix();
-		
-		texture.bind();
-		glTranslatef(x, y, 0);
-    	glColor3f(1,1,1);
-		
-		glBegin(GL_QUADS);
-	      glTexCoord2f(0, 0);
-	      glVertex2f(0, 0);
-	      glTexCoord2f(0, texture.getHeight());
-	      glVertex2f(0, texture.getImageHeight());
-	      glTexCoord2f(texture.getWidth(), texture.getHeight());
-	      glVertex2f(texture.getImageWidth(), texture.getImageHeight());
-	      glTexCoord2f(texture.getWidth(), 0);
-	      glVertex2f(texture.getImageWidth(), 0);
-		glEnd();
-		
-		glPopMatrix();
-	}
-	
-	public void move() {
-		if (y < 10) {
-//			isVisible = false;
-			y = 10;
-			syf /= -2;
-		}
-		
-		if (y > 650) {
-//			isVisible = false;
-			y = 650;
-			syf /= -2;
-		}
-		
-		if (x < 0) {
-			x = 0;
-			sxf /= - 2;
-		}
-		
-		if (x > 1150) {
-			x = 1150;
-			sxf /= -2;
-		}
-		
-		x += sxf;
-		y += syf;
-	}
-	
-	public void reset() {
-		x = (float) (Math.random() * 1150f);
-		y = (float) (Math.random() * 600f);
-	}
-	
-	public boolean isVisible() {
-		return isVisible;
+		Renderer.renderQuadTexture(texture, x, y);
 	}
 	
 	public Texture getTexture() {
 		return texture;
+	}
+	
+	public World getWorld() {
+		return world;
 	}
 	
 	public float getX() {
@@ -140,7 +81,51 @@ public abstract class Entity implements Renderable {
 		return y;
 	}
 	
-	public float getSYF() {
-		return syf;
+	public float getXA() {
+		return xa;
+	}
+	
+	public float getYA() {
+		return ya;
+	}
+	
+	public float getRotation() {
+		return rot;
+	}
+	
+	public float getMass() {
+		return mass;
+	}
+	
+	public boolean isVisible() {
+		return isVisible;
+	}
+	
+	public void setWorld(World world) {
+		this.world = world;
+	}
+	
+	public void setX(float x) {
+		this.x = x;
+	}
+	
+	public void setY(float y) {
+		this.y = y;
+	}
+	
+	public void setXA(float xa) {
+		this.xa = xa;
+	}
+	
+	public void setYA(float ya) {
+		this.ya = ya;
+	}
+	
+	public void setRotation(float rot) {
+		this.rot = rot;
+	}
+	
+	public void setMass(float mass) {
+		this.mass = mass;
 	}
 }

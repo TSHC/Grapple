@@ -1,12 +1,9 @@
 package com.tshcmiller.grapple.sound;
 
-import java.io.IOException;
-
 import org.newdawn.slick.openal.Audio;
-import org.newdawn.slick.openal.AudioLoader;
-import org.newdawn.slick.util.ResourceLoader;
 
 import com.tshcmiller.grapple.Settings;
+import com.tshcmiller.grapple.util.Loader;
 
 public enum Sound {
 	
@@ -15,11 +12,7 @@ public enum Sound {
 	private Audio audio;
 	
 	Sound(String name) {
-		try {
-			audio = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/audio/"+ name));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		audio = new Loader("res/audio/" + name).getAudio();
 	}
 	
 	public static void playSoundEffect(Sound sound) {

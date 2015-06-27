@@ -12,11 +12,13 @@ import com.tshcmiller.grapple.world.World;
 public class PlayerShip extends Ship {
 	
 	private Timer cooldown;
+	public CustomBar healthbar;
 	
 	public PlayerShip(World world, float x, float y) {
 		super(world, x, y);
 		
 		cooldown = new Timer(5);
+		this.healthbar = new CustomBar(world, this, x, y + texture.getImageHeight());
 	}
 	
 	private void handleCollisions() {
@@ -64,7 +66,7 @@ public class PlayerShip extends Ship {
 				if (e instanceof Projectile) {
 					World.bufferEntities.add(e);
 					cooldown.start();
-					((Projectile) e).fire();
+					((Projectile) e).fire(this);
 				}
 			}
 		}
@@ -73,11 +75,15 @@ public class PlayerShip extends Ship {
 	//0.125 * 0.0625 (MIN) ( 1/8)
 	//1.500 * 0.0625 (MAX) (12/8)
 	public void update(int delta) {
+		super.update();
+		
 		if (cooldown.isRunning()) {
 			if (cooldown.hasExpired()) {
 				cooldown.stop();
 			}
 		}
+		
+		healthbar.update(delta);
 		
 		processInput();
 		move();
@@ -86,6 +92,9 @@ public class PlayerShip extends Ship {
 	
 	public void render() {
 		super.render();
+		
+		inventory.render();
+		healthbar.render();
 		
 		if (cooldown.isRunning()) {
 			float x = 2 * (Grapple.width / 5);

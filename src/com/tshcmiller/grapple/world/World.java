@@ -11,6 +11,7 @@ import org.newdawn.slick.opengl.Texture;
 
 import com.tshcmiller.grapple.Grapple;
 import com.tshcmiller.grapple.Renderable;
+import com.tshcmiller.grapple.entity.EnemyShip;
 import com.tshcmiller.grapple.entity.Entity;
 import com.tshcmiller.grapple.entity.PlayerShip;
 import com.tshcmiller.grapple.inventory.GravityBall;
@@ -25,16 +26,16 @@ public class World implements Renderable {
 	
 	private List<Entity> entities; //The entities that are in this world
 	private PlayerShip ship; //The player ship
+	private EnemyShip enemy;
 	private Gravity gravity;
 	private Timer timer;
 	
-	private int maxdelay = 15;
-	private int mindelay = 5;
-	
 	public World() {
 		this.entities = new ArrayList<Entity>();
-		this.ship = new PlayerShip(this, 400, 400);
+		this.ship = new PlayerShip(this, 100, Grapple.height >> 1);
+		this.enemy = new EnemyShip(this, 800, Grapple.height >> 1);
 		this.entities.add(ship);
+		this.entities.add(enemy);
 		this.gravity = new Gravity(GravityDirection.PULL_DOWNWARDS, (1f / 32f));
 		this.timer = new Timer(15);
 		this.timer.start();
@@ -50,47 +51,47 @@ public class World implements Renderable {
 		if (!flag) 
 			return;
 		
-			float x =  0;
-			float y =  0;
-			float xa = 0;
-			float ya = 0;
-			
-			//TODO better implementation to this
-			switch (gravity.getGravityDirection()) {
-				case PULL_DOWNWARDS:
-					x = (float) (Math.random() * Grapple.width);
-					y = Grapple.height;
-					xa = 0.25f;
-					ya = -6.25f;
-				break;
+		float x =  0;
+		float y =  0;
+		float xa = 0;
+		float ya = 0;
+		
+		//TODO better implementation to this
+		switch (gravity.getGravityDirection()) {
+			case PULL_DOWNWARDS:
+				x = (float) (Math.random() * Grapple.width);
+				y = Grapple.height;
+				xa = 0.25f;
+				ya = -6.25f;
+			break;
 				
-				case PULL_UPWARDS:
-					x = (float)(Math.random() * Grapple.width);
-					xa = 0.25f;
-					ya = 6.25f;
-				break;
+			case PULL_UPWARDS:
+				x = (float)(Math.random() * Grapple.width);
+				xa = 0.25f;
+				ya = 6.25f;
+			break;
 				
-				case PULL_LEFTWARDS:
-					y = (float) (Math.random() * Grapple.height);
-					xa = 6.25f;
-					ya = 0.25f;
-				break;
+			case PULL_LEFTWARDS:
+				y = (float) (Math.random() * Grapple.height);
+				xa = 6.25f;
+				ya = 0.25f;
+			break;
 				
-				case PULL_RIGHTWARDS:
-					x = Grapple.width;
-					y = (float)(Math.random() * Grapple.height);
-					xa = -6.25f;
-					ya = 0.25f;
-				break;
+			case PULL_RIGHTWARDS:
+				x = Grapple.width;
+				y = (float)(Math.random() * Grapple.height);
+				xa = -6.25f;
+				ya = 0.25f;
+			break;
 				
-				default: break;
-			}
+			default: break;
+		}
 
-			GravityBall ball = new GravityBall(this, x, y);
-			ball.launchFrom(x, y, xa, ya);
-			
-			entities.add(ball);
-			flag = false;
+		GravityBall ball = new GravityBall(this, x, y);
+		ball.launchFrom(x, y, xa, ya);
+		
+		entities.add(ball);
+		flag = false;
 	}
 	
 	boolean flag = true;
@@ -119,12 +120,12 @@ public class World implements Renderable {
 		}
 		
 		for (Entity e : entities) {
-			gravity.apply(e);
 			e.update(delta);
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-			gravity.setGravityDirection(GravityDirection.PULL_UPWARDS);
+			float health = ship.getHealth();
+			ship.setHealth(health - 1);
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
@@ -145,7 +146,7 @@ public class World implements Renderable {
 		
 		for (float x = 0; x < Grapple.width; x += 64) {
 			for (float y = 0; y < Grapple.height; y += 64) {
-				Renderer.renderQuadTexture(tex, x, y);
+				Renderer.renderQuadTexture(tex, 0, x, y);
 			}
 		}
 		
@@ -157,12 +158,13 @@ public class World implements Renderable {
 		for (Entity e : entities) {
 			e.render();
 		}
-		
-		ship.getInventory().render();
-		
 	}
 
 	public List<Entity> getEntities() {
 		return entities;
+	}
+	
+	public Gravity getGravity() {
+		return gravity;
 	}
 }

@@ -61,7 +61,7 @@ public class Inventory implements Renderable {
 		float y = 7 * (Grapple.height / 8);
 		
 		for (int i = 0; i < slots; i++) {
-			Renderer.renderQuadTexture(slot, x, y);
+			Renderer.renderQuadTexture(slot, 0, x, y);
 			x += slot.getImageWidth();
 		}
 		
@@ -69,7 +69,7 @@ public class Inventory implements Renderable {
 		
 		if (!isEmpty()) {
 			for (int i = 0; i < items.size(); i++) {
-				Renderer.renderQuadTexture(items.get(i).getTexture(), x, y);
+				Renderer.renderQuadTexture(items.get(i).getTexture(), 0,  x, y);
 				x += slot.getImageWidth();
 			}
 		}

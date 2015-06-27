@@ -14,15 +14,7 @@ public final class Renderer {
 	private Renderer() {}
 	
 	public static void renderCardText(float x, float y, float width, float height, Color cardColor, Color textColor, String text) {
-		glColor4f(cardColor.r, cardColor.g, cardColor.b, cardColor.a);
-		
-		glBegin(GL_QUADS);
-			glVertex2f(x, y);
-			glVertex2f(x + width, y);
-			glVertex2f(x + width, y + height);
-			glVertex2f(x, y + height);
-		glEnd();
-		
+		renderQuad(cardColor, x, y, width, height);
 		renderHeaderText(x, y, text, textColor);
 	}
 	
@@ -34,13 +26,31 @@ public final class Renderer {
 		SMALL.drawString(x, y, text, color);
 	}
 	
-	public static void renderQuadTexture(Texture texture, float x, float y) {
+	public static void renderQuad(Color color, float x, float y, float width, float height) {
+		glDisable(GL_TEXTURE_2D);
+		
+		glColor3f(color.r, color.g, color.b);
+		
+		glBegin(GL_QUADS);
+			glVertex2f(x, y);
+			glVertex2f(x + width, y);
+			glVertex2f(x + width, y + height);
+			glVertex2f(x, y + height);
+		glEnd();		
+		
+		glEnable(GL_TEXTURE_2D);
+	}
+	
+	public static void renderQuadTexture(Texture texture, float rot, float x, float y) {
 		float width = texture.getImageWidth();
 		float height = texture.getImageHeight();
 		
 		Color.white.bind();
 		texture.bind();
-		glTranslatef(x, y, 0);
+		
+		glTranslatef(x + width / 2, y + height / 2, 0);
+		glRotatef(rot, 0, 0, 1);
+		glTranslatef(-width / 2, -height / 2, 0);
 		
 		glBegin(GL_QUADS);
 			glTexCoord2f(0, 0);

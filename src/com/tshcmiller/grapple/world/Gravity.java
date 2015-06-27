@@ -1,7 +1,7 @@
 package com.tshcmiller.grapple.world;
 
 import com.tshcmiller.grapple.Grapple;
-import com.tshcmiller.grapple.entity.Entity;
+import com.tshcmiller.grapple.entity.MobileEntity;
 
 public class Gravity {
 		
@@ -15,7 +15,7 @@ public class Gravity {
 		this.force = force;
 	}
 	
-	public void apply(Entity e) {
+	public void apply(MobileEntity e) {
 		float cxa = e.getXA();
 		float cya = e.getYA();
 		

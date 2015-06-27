@@ -41,8 +41,15 @@ public abstract class Entity implements Renderable {
 	
 	public abstract void update(int delta);
 	
-	protected void addForDeletion() {
+	public void addForDeletion() {
 		entitiesToDelete.add(this);
+	}
+	
+	public void launchFrom(float x, float y, float xa, float ya) {
+		this.x = x;
+		this.y = y;
+		this.xa = xa;
+		this.ya = ya;
 	}
 	
 	public void move() {

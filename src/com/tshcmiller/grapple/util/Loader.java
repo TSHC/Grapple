@@ -32,14 +32,14 @@ public class Loader {
 		return audio;
 	}
 	
-	public TrueTypeFont getCustomFont(boolean antiAlias) {
+	public TrueTypeFont getCustomFont(float size, boolean antiAlias) {
 		Font font = null;
 		
 		try {			
 			InputStream stream = ResourceLoader.getResourceAsStream("res/fonts/contl.ttf");
 			
 			font = Font.createFont(Font.TRUETYPE_FONT, stream);
-			font = font.deriveFont(16f);
+			font = font.deriveFont(size);
 						
 		} catch (IOException | FontFormatException e) {
 			e.printStackTrace();

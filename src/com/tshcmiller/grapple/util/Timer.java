@@ -3,90 +3,70 @@ package com.tshcmiller.grapple.util;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.tshcmiller.grapple.game.Game;
+
+//A simple lightweight timer
 public class Timer {
 	
 	public static int seconds = 0;
 	private static Set<Timer> timers = new HashSet<Timer>();
 	
-	private boolean isPaused;
-	private long timeOut;
-	private long timeCurrent;
-	private long timeEnd;
-
-	public Timer(long delay) {
-		timeCurrent = seconds;
-		timeEnd = seconds + delay;
-		timers.add(this);
+	private long time;
+	private long current;
+	private long target;
+	
+	//Create a timer, specify how long this timer will run for
+	public Timer(long time) {
+		this.time = time;
 	}
 	
-	public static void pauseAllTimers() {
-		for (Timer t : timers) {
-			t.pause();
-		}
-	}
-	
-	public static void resumeAllTimers() {
-		for (Timer t : timers) {
-			t.resume();
-		}
-	}
-	
-	public static void updateTimers() {
+	public static void update(Game game) {
+		if (game.isPaused)
+			return ;
+		
 		seconds++;
 		
 		for (Timer t : timers) {
-			if (!t.isPaused) {
-				t.timeCurrent = seconds;
-			} else {
-				t.timeOut++;
-			}
+			t.current = seconds;
 		}
 	}
 	
-	public void addRandomDelay(long max) {
-		delay((long) (1 + (Math.random() * max)));
+	public static int timersRunning() {
+		return timers.size();
 	}
 	
-	public void addRandomDelay(long min, long max) {
-		delay((long)(min + Math.random() * max));
-	}
-	
-	public void delay(long delay) {
-		if (hasExpired()) {
-			timeCurrent = seconds + delay;
-			timeEnd = timeCurrent + delay;
-		} else {
-			timeCurrent += delay;
-			timeEnd += delay;
-		}
-		
-		System.out.println("delayed timer: " + delay);
-	}
-	
-	public void pause() {
-		isPaused = true;
-	}
-	
-	public void resume() {
-		isPaused = false;
-		delay(timeOut);
-		timeOut = 0;
-	}
-	
-	public void reset(long delay) {
-		timeCurrent = Timer.seconds;
-		timeEnd = timeCurrent + delay;
+	public long getRandomDelay(long min, long max) {
+		return (long)(min + (Math.random() * max));
 	}
 	
 	public boolean hasExpired() {
-		return (timeCurrent >= timeEnd);
+		return (current >= target);
 	}
 	
-	public long getSecondsLeft() {
-		return (timeEnd - timeCurrent);
+	public boolean isRunning() {
+		return timers.contains(this);
 	}
 	
-	//Timer gravity = new Timer(15);
+	public long secondsLeft() {
+		return (target - current);
+	}
 	
+	public void start() {
+		current = seconds;
+		target = seconds + time;
+		timers.add(this);
+	}
+	
+	public void stop() {
+		current = 0;
+		target = 0;
+		timers.remove(this);
+	}
+	
+	public void setTime(long time) {
+		this.time = time;
+		stop();
+		start();
+	}
 	
 }

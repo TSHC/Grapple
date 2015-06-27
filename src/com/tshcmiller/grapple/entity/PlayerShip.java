@@ -1,24 +1,42 @@
 package com.tshcmiller.grapple.entity;
 
 import org.lwjgl.input.Keyboard;
+import org.newdawn.slick.Color;
 
+import com.tshcmiller.grapple.Grapple;
+import com.tshcmiller.grapple.inventory.Item;
+import com.tshcmiller.grapple.util.Renderer;
+import com.tshcmiller.grapple.util.Timer;
 import com.tshcmiller.grapple.world.World;
 
 public class PlayerShip extends Ship {
-
+	
+	private Timer cooldown;
+	
 	public PlayerShip(World world, float x, float y) {
 		super(world, x, y);
+		
+		cooldown = new Timer(5);
 	}
 	
+	private void handleCollisions() {
+		for (Entity e : world.getEntities()) {
+			if (e == this)
+				continue;
 			
-	public void update(int delta) {
-		float tick = 16f;
+			if (this.isColliding(e) && e instanceof Item) {
+				Item item = (Item) e;
+				if (!inventory.isFull() && item.canBePickedUp()) {
+					item.addToInventory(inventory);
+					e.addForDeletion();
+				}
+			}
+		}
+	}
+	
+	private void processInput() {
 		float multiplier = 1;
-//		float gravity = 0.50f * (1f / tick);
-		
-		//0.125 * 0.0625 (MIN) ( 1/8)
-		//1.500 * 0.0625 (MAX) (12/8)
-		float acceleration = multiplier * (1f / tick);
+		float acceleration = multiplier * (1f / 16f);
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
 			ya -= acceleration;
@@ -37,15 +55,43 @@ public class PlayerShip extends Ship {
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+			if (cooldown.isRunning() && !cooldown.hasExpired()) {
+				return;
+			}
 			
+			if (!inventory.isEmpty()) {
+				Entity e = (Entity) inventory.removeItem(0);
+				if (e instanceof Projectile) {
+					World.bufferEntities.add(e);
+					cooldown.start();
+					((Projectile) e).fire();
+				}
+			}
+		}
+	}
+	
+	//0.125 * 0.0625 (MIN) ( 1/8)
+	//1.500 * 0.0625 (MAX) (12/8)
+	public void update(int delta) {
+		if (cooldown.isRunning()) {
+			if (cooldown.hasExpired()) {
+				cooldown.stop();
+			}
 		}
 		
-//		ya += gravity;
+		processInput();
+		move();
+		handleCollisions();
+	}
+	
+	public void render() {
+		super.render();
 		
-//		System.out.printf("XA: %.2f, YA: %.2f%n", xa, ya);
-		
-		x += xa;
-		y += ya;
-		
+		if (cooldown.isRunning()) {
+			float x = 2 * (Grapple.width / 5);
+			float y = 6 * (Grapple.height / 8);
+			
+			Renderer.renderHeaderText(x, y, "Able to fire in: " + cooldown.secondsLeft(), Color.red);
+		}
 	}
 }

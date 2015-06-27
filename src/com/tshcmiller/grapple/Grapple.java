@@ -1,13 +1,12 @@
 package com.tshcmiller.grapple;
 
-import static org.lwjgl.opengl.GL11.glClearColor;
-
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
 
 import com.tshcmiller.grapple.game.Game;
 import com.tshcmiller.grapple.game.GameState;
@@ -54,15 +53,15 @@ public class Grapple {
 		try {
 			Display.setTitle(TITLE);
 			
-//			if (Settings.settings.useFullScreen) {
-//				Display.setFullscreen(true);
-//				width = Display.getWidth();
-//				height = Display.getHeight();
-//			} else {
+			if (Settings.settings.useFullScreen) {
+				Display.setFullscreen(true);
+				width = Display.getWidth();
+				height = Display.getHeight();
+			} else {
 				width = Settings.settings.prefWidth;
 				height = Settings.settings.prefHeight;
-				Display.setDisplayMode(new DisplayMode(width, height));	
-//			}
+				Display.setDisplayMode(new DisplayMode(width, height));					
+			}
 			
 			Display.create();
 		} catch (LWJGLException e) {
@@ -115,7 +114,7 @@ public class Grapple {
 	
 	public void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		Renderer.drawString(10, 10, "FPS: " + currentFPS);
+		Renderer.renderNormalText(10, 10, "FPS: " + currentFPS, Color.cyan);
 		game.render();
 	}
 	
@@ -138,7 +137,7 @@ public class Grapple {
 	
 	public void calculateFPS() {
 		if (getTime() - lastFPS > 1000) {
-			Timer.updateTimers();
+			Timer.update(game);
 			currentFPS = FPS;
 			FPS = 0;
 			lastFPS += 1000;

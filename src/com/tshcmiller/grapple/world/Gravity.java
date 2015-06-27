@@ -72,11 +72,18 @@ public class Gravity {
 	
 	public GravityDirection nextDirection() {
 		GravityDirection next = null;
-					
+		
+		int counter = 0;
+		
 		do {
 			int rand = (int)(Math.random() * GravityDirection.values().length);
 			next = GravityDirection.values()[rand];
-		} while (direction == next && direction == GravityDirection.PULL_CENTER);
+			counter++;
+			
+			if (counter > 1000)
+				break;
+			
+		} while (direction == next || direction == GravityDirection.PULL_CENTER);
 		
 		return next;
 	}

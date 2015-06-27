@@ -1,21 +1,30 @@
 package com.tshcmiller.grapple.world;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.lwjgl.input.Keyboard;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.opengl.Texture;
 
 import com.tshcmiller.grapple.Grapple;
 import com.tshcmiller.grapple.Renderable;
 import com.tshcmiller.grapple.entity.Entity;
-import com.tshcmiller.grapple.entity.GravityBall;
 import com.tshcmiller.grapple.entity.PlayerShip;
+import com.tshcmiller.grapple.inventory.GravityBall;
+import com.tshcmiller.grapple.util.Loader;
 import com.tshcmiller.grapple.util.Renderer;
 import com.tshcmiller.grapple.util.Timer;
 
 public class World implements Renderable {
 	
 	public static final float TERMINAL_VELOCITY = 4.25f;
+	public static Set<Entity> bufferEntities = new HashSet<Entity>();
 	
 	private List<Entity> entities; //The entities that are in this world
+	private PlayerShip ship; //The player ship
 	private Gravity gravity;
 	private Timer timer;
 	
@@ -24,10 +33,11 @@ public class World implements Renderable {
 	
 	public World() {
 		this.entities = new ArrayList<Entity>();
-		this.entities.add(new PlayerShip(this, 400, 400));
+		this.ship = new PlayerShip(this, 400, 400);
+		this.entities.add(ship);
 		this.gravity = new Gravity(GravityDirection.PULL_DOWNWARDS, (1f / 32f));
-		this.timer = new Timer(0);
-		this.timer.addRandomDelay(mindelay, maxdelay);
+		this.timer = new Timer(15);
+		this.timer.start();
 	}
 	
 	//Load a world from a file
@@ -35,36 +45,51 @@ public class World implements Renderable {
 		this.entities = world.entities;
 		this.gravity = world.gravity;
 	}
-	
+
 	public void dropRandomEntity() {
 		if (!flag) 
 			return;
 		
-			float x = (float)(Math.random() * Grapple.width); 
-			float y = (float)(Math.random() * Grapple.height);
-		
+			float x =  0;
+			float y =  0;
+			float xa = 0;
+			float ya = 0;
+			
+			//TODO better implementation to this
 			switch (gravity.getGravityDirection()) {
-				case PULL_UPWARDS:
+				case PULL_DOWNWARDS:
+					x = (float) (Math.random() * Grapple.width);
 					y = Grapple.height;
+					xa = 0.25f;
+					ya = -6.25f;
 				break;
 				
-				case PULL_DOWNWARDS:
-					y = 0;
+				case PULL_UPWARDS:
+					x = (float)(Math.random() * Grapple.width);
+					xa = 0.25f;
+					ya = 6.25f;
 				break;
 				
 				case PULL_LEFTWARDS:
-					x = Grapple.width;
+					y = (float) (Math.random() * Grapple.height);
+					xa = 6.25f;
+					ya = 0.25f;
 				break;
 				
 				case PULL_RIGHTWARDS:
-					x = 0;
+					x = Grapple.width;
+					y = (float)(Math.random() * Grapple.height);
+					xa = -6.25f;
+					ya = 0.25f;
 				break;
 				
-				default:
-					break;
+				default: break;
 			}
+
+			GravityBall ball = new GravityBall(this, x, y);
+			ball.launchFrom(x, y, xa, ya);
 			
-			entities.add(new GravityBall(this, x, y));
+			entities.add(ball);
 			flag = false;
 	}
 	
@@ -76,37 +101,65 @@ public class World implements Renderable {
 			Entity.entitiesToDelete.clear();
 		}
 		
-		System.out.println(Grapple.getTime());
-		
-		if (Timer.seconds % 5 == 0 && flag) {
-			dropRandomEntity();
-		} 
-		
-		if (Timer.seconds % 5 != 0) {
+		if (bufferEntities.size() > 0) {
+			entities.addAll(bufferEntities);
+			bufferEntities.clear();
+		}
+				
+		if (Timer.seconds % 5 == 0) {
+			if (flag)
+				dropRandomEntity();
+		} else {
 			flag = true;
 		}
 		
 		if (timer.hasExpired()) {
 			gravity.changeDirection();
-			timer.addRandomDelay(mindelay, maxdelay);
+			timer.setTime(timer.getRandomDelay(5, 15));
 		}
 		
 		for (Entity e : entities) {
 			gravity.apply(e);
 			e.update(delta);
 		}
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+			gravity.setGravityDirection(GravityDirection.PULL_UPWARDS);
+		}
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+			gravity.setGravityDirection(GravityDirection.PULL_DOWNWARDS);
+		}
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+			gravity.setGravityDirection(GravityDirection.PULL_LEFTWARDS);
+		}
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+			gravity.setGravityDirection(GravityDirection.PULL_RIGHTWARDS);
+		}
 	}
 	
 	public void render() {
-//		if (timer.getSecondsLeft() <= 5) {
-			Renderer.drawString((Grapple.width >> 1) - 250, 100, "Gravity changing to " + gravity.getNextGravityDirection() + " in " + timer.getSecondsLeft());
-//		}
-			
-			Renderer.drawString(10, 25, "Entities: " + entities.size());
+		Texture tex = new Loader("res/textures/lab-tile.png").getTexture();
 		
+		for (float x = 0; x < Grapple.width; x += 64) {
+			for (float y = 0; y < Grapple.height; y += 64) {
+				Renderer.renderQuadTexture(tex, x, y);
+			}
+		}
+		
+		if (timer.secondsLeft() <= 5) {
+			String message = "Gravity changing to " + gravity.getNextGravityDirection() + " in " + timer.secondsLeft();			
+			Renderer.renderCardText((Grapple.width >> 1) - 250, 150, 423, 45, new Color(1f, 1f, 1f, 0.9f), Color.cyan, message);
+		}
+							
 		for (Entity e : entities) {
 			e.render();
 		}
+		
+		ship.getInventory().render();
+		
 	}
 
 	public List<Entity> getEntities() {

@@ -17,7 +17,7 @@ A - Apply a leftward force to your ship<br />
 D - Apply a rightward force to your ship<br />
 
 ### Gravity
-Gravity is changes directions periodically.
+Gravity changes directions periodically.
 
 ### Power-ups
 There are power-ups the player can catch.

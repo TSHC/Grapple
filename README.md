@@ -23,7 +23,7 @@ Gravity changes directions periodically.
 There are power-ups the player can catch.
 
 ##Devolopment Log
-*15 June, 2015* Project began! Bases for the game were added.
-*20 June, 2015* Added Basic Movement
-*23 June, 2015* Project is now using [LWJGL](http://www.lwjgl.org/ LWJGL)
+*15 June, 2015* Project began! Bases for the game were added.<br />
+*20 June, 2015* Added Basic Movement<br />
+*23 June, 2015* Project is now using [LWJGL](http://www.lwjgl.org/ LWJGL)<br />
 *24 June, 2015* Gravity is now functional! Added some settings.
